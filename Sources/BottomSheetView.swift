@@ -126,6 +126,8 @@ public final class BottomSheetView: UIView {
         view.axis = .vertical
         view.distribution = .fillProportionally
         view.spacing = 0
+        view.layer.cornerRadius = 16
+        view.layer.masksToBounds = true
         return view
     }()
 
@@ -328,7 +330,7 @@ public final class BottomSheetView: UIView {
             handleBackgroundView.trailingAnchor.constraint(equalTo: trailingAnchor),
             handleBackgroundView.heightAnchor.constraint(equalToConstant: .handleHeight),
             
-            contentVStackView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
+            contentVStackView.topAnchor.constraint(equalTo: topAnchor, constant: 12),
             contentVStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
             contentVStackView.trailingAnchor.constraint(equalTo: trailingAnchor),
 
