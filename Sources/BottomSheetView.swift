@@ -68,6 +68,11 @@ public final class BottomSheetView: UIView {
         get { dimView.isHidden }
         set { dimView.isHidden = newValue }
     }
+    
+    public var isHandleViewHidden: Bool {
+        get { handleView.isHidden }
+        set { handleView.isHidden = newValue }
+    }
 
     public let draggableHeight: CGFloat?
 
@@ -114,6 +119,15 @@ public final class BottomSheetView: UIView {
         view.alpha = 0
         return view
     }()
+    
+    private lazy var contentVStackView: UIStackView = {
+        let view = UIStackView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.axis = .vertical
+        view.distribution = .fillProportionally
+        view.spacing = 0
+        return view
+    }()
 
     private lazy var contentViewHeightConstraint = contentView.heightAnchor.constraint(greaterThanOrEqualToConstant: 0)
 
@@ -138,6 +152,8 @@ public final class BottomSheetView: UIView {
         self.dismissalDelegate = dismissalDelegate
         self.animationDelegate = animationDelegate
         super.init(frame: .zero)
+        self.contentVStackView.addArrangedSubview(self.handleView)
+        self.contentVStackView.addArrangedSubview(self.contentView)
         setup()
         accessibilityViewIsModal = true
     }
@@ -300,10 +316,9 @@ public final class BottomSheetView: UIView {
         handleBackgroundView.layer.maskedCorners = layer.maskedCorners
         handleBackgroundView.clipsToBounds = true
 
-        addSubview(contentView)
+        addSubview(contentVStackView)
         addSubview(handleBackgroundView)
-        addSubview(handleView)
-
+        
         handleBackgroundView.translatesAutoresizingMaskIntoConstraints = false
         contentView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -312,15 +327,12 @@ public final class BottomSheetView: UIView {
             handleBackgroundView.leadingAnchor.constraint(equalTo: leadingAnchor),
             handleBackgroundView.trailingAnchor.constraint(equalTo: trailingAnchor),
             handleBackgroundView.heightAnchor.constraint(equalToConstant: .handleHeight),
+            
+            contentVStackView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
+            contentVStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            contentVStackView.trailingAnchor.constraint(equalTo: trailingAnchor),
 
-            handleView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
-            handleView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            handleView.widthAnchor.constraint(equalToConstant: 25),
-            handleView.heightAnchor.constraint(equalToConstant: 4),
-
-            contentView.topAnchor.constraint(equalTo: handleView.bottomAnchor, constant: 8),
-            contentView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            handleView.heightAnchor.constraint(equalToConstant: 4)
         ]
 
         if stretchOnResize {
