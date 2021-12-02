@@ -25,7 +25,6 @@ extension Array where Element == CGFloat {
 }
 
 // MARK: - Delegate
-
 public protocol BottomSheetViewDismissalDelegate: AnyObject {
     func bottomSheetView(_ view: BottomSheetView, willDismissBy action: BottomSheetView.DismissAction)
 }
@@ -36,7 +35,6 @@ public protocol BottomSheetViewAnimationDelegate: AnyObject {
 }
 
 // MARK: - View
-
 public final class BottomSheetView: UIView {
     public enum HandleBackground {
         case color(UIColor)
@@ -68,7 +66,7 @@ public final class BottomSheetView: UIView {
         get { dimView.isHidden }
         set { dimView.isHidden = newValue }
     }
-    
+
     public var isHandleViewHidden: Bool {
         get { handleView.isHidden }
         set { handleView.isHidden = newValue }
@@ -81,7 +79,6 @@ public final class BottomSheetView: UIView {
     }
 
     // MARK: - Private properties
-
     private let useSafeAreaInsets: Bool
     private let stretchOnResize: Bool
     private let contentView: UIView
@@ -119,22 +116,10 @@ public final class BottomSheetView: UIView {
         view.alpha = 0
         return view
     }()
-    
-    private lazy var contentVStackView: UIStackView = {
-        let view = UIStackView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.axis = .vertical
-        view.distribution = .fillProportionally
-        view.spacing = 0
-        view.layer.cornerRadius = 16
-        view.layer.masksToBounds = true
-        return view
-    }()
 
     private lazy var contentViewHeightConstraint = contentView.heightAnchor.constraint(greaterThanOrEqualToConstant: 0)
 
     // MARK: - Init
-
     public init(
         contentView: UIView,
         contentHeights: [CGFloat],
@@ -154,8 +139,6 @@ public final class BottomSheetView: UIView {
         self.dismissalDelegate = dismissalDelegate
         self.animationDelegate = animationDelegate
         super.init(frame: .zero)
-        self.contentVStackView.addArrangedSubview(self.handleView)
-        self.contentVStackView.addArrangedSubview(self.contentView)
         setup()
         accessibilityViewIsModal = true
     }
@@ -165,7 +148,6 @@ public final class BottomSheetView: UIView {
     }
 
     // MARK: - Overrides
-
     public override func layoutSubviews() {
         super.layoutSubviews()
         // Make shadow to be on top
@@ -174,7 +156,6 @@ public final class BottomSheetView: UIView {
     }
 
     // MARK: - Public API
-
     /// Presents bottom sheet view from the bottom of the given container view.
     ///
     /// - Parameters:
@@ -267,11 +248,11 @@ public final class BottomSheetView: UIView {
         }
     }
 
-    public func reload(with contentHeights: [CGFloat], targetIndex: Int?) {
+    public func reload(with contentHeights: [CGFloat]) {
+        let previousHeight = self.contentHeights[safe: currentTargetOffsetIndex] ?? 0
+        let indexOfPreviousHeightInNewHeights = contentHeights.firstIndex(of: previousHeight) ?? 0
         self.contentHeights = contentHeights
-        if let targetIndex = targetIndex {
-            currentTargetOffsetIndex = targetIndex
-        }
+        currentTargetOffsetIndex = indexOfPreviousHeightInNewHeights
         reset()
     }
 
@@ -299,7 +280,6 @@ public final class BottomSheetView: UIView {
     }
 
     // MARK: - Setup
-
     private func setup() {
         clipsToBounds = true
         backgroundColor = contentView.backgroundColor ?? .bgPrimary
@@ -318,9 +298,10 @@ public final class BottomSheetView: UIView {
         handleBackgroundView.layer.maskedCorners = layer.maskedCorners
         handleBackgroundView.clipsToBounds = true
 
-        addSubview(contentVStackView)
+        addSubview(contentView)
         addSubview(handleBackgroundView)
-        
+        addSubview(handleView)
+
         handleBackgroundView.translatesAutoresizingMaskIntoConstraints = false
         contentView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -329,12 +310,15 @@ public final class BottomSheetView: UIView {
             handleBackgroundView.leadingAnchor.constraint(equalTo: leadingAnchor),
             handleBackgroundView.trailingAnchor.constraint(equalTo: trailingAnchor),
             handleBackgroundView.heightAnchor.constraint(equalToConstant: .handleHeight),
-            
-            contentVStackView.topAnchor.constraint(equalTo: topAnchor, constant: 12),
-            contentVStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            contentVStackView.trailingAnchor.constraint(equalTo: trailingAnchor),
 
-            handleView.heightAnchor.constraint(equalToConstant: 4)
+            handleView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
+            handleView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            handleView.widthAnchor.constraint(equalToConstant: 25),
+            handleView.heightAnchor.constraint(equalToConstant: 4),
+
+            contentView.topAnchor.constraint(equalTo: handleView.bottomAnchor, constant: 4),
+            contentView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: trailingAnchor),
         ]
 
         if stretchOnResize {
@@ -347,13 +331,11 @@ public final class BottomSheetView: UIView {
     }
 
     // MARK: - Internal methods
-
     func hideDimView() {
         dimView.removeFromSuperview()
     }
 
     // MARK: - Animations
-
     private func animate(to offset: CGFloat, with initialVelocity: CGPoint = .zero) {
         if let index = targetOffsets.firstIndex(of: offset) {
             currentTargetOffsetIndex = index
@@ -376,7 +358,6 @@ public final class BottomSheetView: UIView {
     }
 
     // MARK: - UIPanGestureRecognizer
-
     @objc private func handlePan(panGesture: UIPanGestureRecognizer) {
         initialOffset = initialOffset ?? topConstraint.constant
         let translation = panGesture.translation(in: superview)
@@ -424,13 +405,11 @@ public final class BottomSheetView: UIView {
     }
 
     // MARK: - UITapGestureRecognizer
-
     @objc private func handleTap(tapGesture: UITapGestureRecognizer) {
         dismissalDelegate?.bottomSheetView(self, willDismissBy: .tap)
     }
 
     // MARK: - Offset calculation
-
     private func updateTargetOffsets() {
         guard let superview = superview else { return }
 
@@ -461,7 +440,6 @@ public final class BottomSheetView: UIView {
 }
 
 // MARK: - Private types
-
 private class PanGestureRecognizer: UIPanGestureRecognizer {
     var draggableHeight: CGFloat?
 
@@ -481,7 +459,6 @@ private class PanGestureRecognizer: UIPanGestureRecognizer {
 }
 
 // MARK: - HandleViewDelegate
-
 extension BottomSheetView: HandleViewDelegate {
     func didPerformAccessibilityActivate(_ view: HandleView) -> Bool {
         dismissalDelegate?.bottomSheetView(self, willDismissBy: .tap)
@@ -490,7 +467,6 @@ extension BottomSheetView: HandleViewDelegate {
 }
 
 // MARK: - Internal extensions
-
 extension UIColor {
     class var handle: UIColor {
         return dynamicColorIfAvailable(

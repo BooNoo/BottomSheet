@@ -6,7 +6,7 @@ import UIKit
 
 public final class BottomSheetTransitioningDelegate: NSObject {
     public private(set) var contentHeights: [CGFloat]
-    private var startTargetIndex: Int
+    private let startTargetIndex: Int
     private let handleBackground: BottomSheetView.HandleBackground
     private let draggableHeight: CGFloat?
     private let useSafeAreaInsets: Bool
@@ -24,7 +24,6 @@ public final class BottomSheetTransitioningDelegate: NSObject {
     }
 
     // MARK: - Init
-
     public init(
         contentHeights: [CGFloat],
         startTargetIndex: Int = 0,
@@ -46,7 +45,6 @@ public final class BottomSheetTransitioningDelegate: NSObject {
     }
 
     // MARK: - Public
-
     /// Animates bottom sheet view to the given height.
     ///
     /// - Parameters:
@@ -62,11 +60,8 @@ public final class BottomSheetTransitioningDelegate: NSObject {
     }
 
     public func reload(with contentHeights: [CGFloat]) {
-        let previousHeight = self.contentHeights[safe: startTargetIndex] ?? 0
-        let indexOfPreviousHeightInNewHeights = contentHeights.firstIndex(of: previousHeight) ?? 0
         self.contentHeights = contentHeights
-        startTargetIndex = indexOfPreviousHeightInNewHeights
-        presentationController?.reload(with: contentHeights, targetIndex: startTargetIndex)
+        presentationController?.reload(with: contentHeights)
     }
 
     public func hideBackgroundOverlay() {
@@ -75,7 +70,6 @@ public final class BottomSheetTransitioningDelegate: NSObject {
 }
 
 // MARK: - UIViewControllerTransitioningDelegate
-
 extension BottomSheetTransitioningDelegate: UIViewControllerTransitioningDelegate {
     public func presentationController(
         forPresented presented: UIViewController,
@@ -120,7 +114,6 @@ extension BottomSheetTransitioningDelegate: UIViewControllerTransitioningDelegat
 }
 
 // MARK: - Private types
-
 private class WeakRef<T> where T: AnyObject {
     private(set) weak var value: T?
 

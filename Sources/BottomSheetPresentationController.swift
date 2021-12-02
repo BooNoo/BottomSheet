@@ -36,7 +36,6 @@ public protocol BottomSheetPresentationControllerDelegate: AnyObject {
 final class BottomSheetPresentationController: UIPresentationController {
 
     // MARK: - Internal properties
-
     var transitionState: TransitionState?
 
     var dimViewBackgroundColor: UIColor? {
@@ -44,9 +43,8 @@ final class BottomSheetPresentationController: UIPresentationController {
     }
 
     // MARK: - Private properties
-
     private var contentHeights: [CGFloat]
-    private var startTargetIndex: Int
+    private let startTargetIndex: Int
     private let handleBackground: BottomSheetView.HandleBackground
     private let useSafeAreaInsets: Bool
     private let draggableHeight: CGFloat?
@@ -59,7 +57,6 @@ final class BottomSheetPresentationController: UIPresentationController {
     private weak var transitionContext: UIViewControllerContextTransitioning?
 
     // MARK: - Init
-
     init(
         presentedViewController: UIViewController,
         presenting: UIViewController?,
@@ -84,7 +81,6 @@ final class BottomSheetPresentationController: UIPresentationController {
     }
 
     // MARK: - Internal
-
     func transition(to index: Int) {
         bottomSheetView?.transition(to: index)
     }
@@ -93,12 +89,9 @@ final class BottomSheetPresentationController: UIPresentationController {
         bottomSheetView?.reset()
     }
 
-    func reload(with contentHeights: [CGFloat], targetIndex: Int?) {
+    func reload(with contentHeights: [CGFloat]) {
         self.contentHeights = contentHeights
-        if let targetIndex = targetIndex {
-            startTargetIndex = targetIndex
-        }
-        bottomSheetView?.reload(with: contentHeights, targetIndex: targetIndex)
+        bottomSheetView?.reload(with: contentHeights)
     }
 
     func hideDimView() {
@@ -106,7 +99,6 @@ final class BottomSheetPresentationController: UIPresentationController {
     }
 
     // MARK: - Transition life cycle
-
     override func presentationTransitionWillBegin() {
         guard transitionState == .presenting else { return }
         createBottomSheetView()
@@ -180,7 +172,6 @@ final class BottomSheetPresentationController: UIPresentationController {
 }
 
 // MARK: - UIViewControllerAnimatedTransitioning
-
 extension BottomSheetPresentationController: UIViewControllerAnimatedTransitioning {
     func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
         return 0
@@ -214,7 +205,6 @@ extension BottomSheetPresentationController: UIViewControllerAnimatedTransitioni
 }
 
 // MARK: - UIViewControllerInteractiveTransitioning
-
 extension BottomSheetPresentationController: UIViewControllerInteractiveTransitioning {
     func startInteractiveTransition(_ transitionContext: UIViewControllerContextTransitioning) {
         animateTransition(using: transitionContext)
@@ -222,7 +212,6 @@ extension BottomSheetPresentationController: UIViewControllerInteractiveTransiti
 }
 
 // MARK: - BottomSheetViewPresenterDelegate
-
 extension BottomSheetPresentationController: BottomSheetViewDismissalDelegate {
     func bottomSheetView(_ view: BottomSheetView, willDismissBy action: BottomSheetView.DismissAction) {
         guard presentationDelegate?.bottomSheetPresentationController(self, shouldDismissBy: action) ?? true else {
